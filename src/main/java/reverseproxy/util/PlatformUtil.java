@@ -11,8 +11,6 @@ import java.security.PrivilegedAction;
 import java.util.Properties;
 
 public class PlatformUtil {
-
-
     // NOTE: since this class can be initialized by application code in some
     // cases, we must encapsulate all calls to System.getProperty("...") in
     // a doPrivileged block except for standard JVM properties such as
@@ -28,13 +26,9 @@ public class PlatformUtil {
     private static final boolean WINDOWS_VISTA_OR_LATER = WINDOWS && versionNumberGreaterThanOrEqualTo(6.0f);
     private static final boolean WINDOWS_7_OR_LATER = WINDOWS && versionNumberGreaterThanOrEqualTo(6.1f);
     private static final boolean MAC = os.startsWith("Mac");
-    private static final boolean LINUX = os.startsWith("Linux") && !ANDROID;
-    private static final boolean SOLARIS = os.startsWith("SunOS");
     private static final boolean IOS = os.startsWith("iOS");
     // a property used to denote a non-default impl for this host
     private static String javafxPlatform;
-    private static final boolean ANDROID = "android".equals(javafxPlatform)
-            || "Dalvik".equals(System.getProperty("java.vm.name"));
 
     static {
         javafxPlatform = AccessController.doPrivileged(new PrivilegedAction<String>() {
@@ -113,13 +107,6 @@ public class PlatformUtil {
         return MAC;
     }
 
-    /**
-     * Returns true if the operating system is a form of Linux.
-     */
-    public static boolean isLinux() {
-        return LINUX;
-    }
-
     public static boolean useEGL() {
         return useEGL;
     }
@@ -139,20 +126,6 @@ public class PlatformUtil {
             return true;
         else
             return false;
-    }
-
-    /**
-     * Returns true if the operating system is a form of Unix, including Linux.
-     */
-    public static boolean isSolaris() {
-        return SOLARIS;
-    }
-
-    /**
-     * Returns true if the operating system is a form of Linux or Solaris
-     */
-    public static boolean isUnix() {
-        return LINUX || SOLARIS;
     }
 
     /**
@@ -268,9 +241,5 @@ public class PlatformUtil {
                 return null;
             }
         });
-    }
-
-    public static boolean isAndroid() {
-        return ANDROID;
     }
 }

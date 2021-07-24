@@ -19,9 +19,7 @@ import java.util.concurrent.ThreadFactory;
 public class Independent {
 
     public static EventLoopGroup newEventLoopGroup(int nThreads, ThreadFactory threadFactory) {
-        if (PlatformUtil.isLinux()) {
-            return new EpollEventLoopGroup(nThreads, threadFactory);
-        } else if (PlatformUtil.isMac()) {
+        if (PlatformUtil.isMac()) {
             return new KQueueEventLoopGroup(nThreads, threadFactory);
         } else {
             return new NioEventLoopGroup(nThreads, threadFactory);
@@ -29,9 +27,7 @@ public class Independent {
     }
 
     public static Class<? extends Channel> channelClass() {
-        if (PlatformUtil.isLinux()) {
-            return EpollSocketChannel.class;
-        } else if (PlatformUtil.isMac()) {
+        if (PlatformUtil.isMac()) {
             return KQueueSocketChannel.class;
         } else {
             return NioSocketChannel.class;
@@ -39,9 +35,7 @@ public class Independent {
     }
 
     public static Class<? extends ServerChannel> serverChannelClass() {
-        if (PlatformUtil.isLinux()) {
-            return EpollServerSocketChannel.class;
-        } else if (PlatformUtil.isMac()) {
+        if (PlatformUtil.isMac()) {
             return KQueueServerSocketChannel.class;
         } else {
             return NioServerSocketChannel.class;
