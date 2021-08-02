@@ -13,6 +13,7 @@ public class RoundRobinFactory {
     private final Map<String, RoundRobin> robinMap = new HashMap<>();
 
     public void init(ReverseProxyConfig config) {
+        System.out.println("===========RoundRobinFactory========");
         Map<String, List<Server>> upstreams = config.upstreams();
         if (null == upstreams || upstreams.isEmpty()) {
             return;

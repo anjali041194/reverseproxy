@@ -51,16 +51,15 @@ public class ReverseProxy {
 
     public void runFromConfig(ReverseProxyConfig config) {
 
-        EventLoopGroup bossGroup = Independent.newEventLoopGroup(1, new DefaultThreadFactory("Xproxy-Boss-Thread"));
+        EventLoopGroup bossGroup = Independent.newEventLoopGroup(1, new DefaultThreadFactory("ReverseProxy-Boss-Thread"));
         EventLoopGroup workerGroup = Independent.newEventLoopGroup(config.workerThreads(),
-                new DefaultThreadFactory("Xproxy-Downstream-Worker-Thread"));
+                new DefaultThreadFactory("ReverseProxy-Downstream-Worker-Thread"));
 
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup);
             b.channel(Independent.serverChannelClass());
 
-            // connections wait for accept(influenced by maxconn)
             b.option(ChannelOption.SO_BACKLOG, 1024);
             b.option(ChannelOption.SO_REUSEADDR, true);
             b.childOption(ChannelOption.SO_KEEPALIVE, true);

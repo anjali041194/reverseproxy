@@ -34,17 +34,18 @@ public class RoundRobin implements ServerChooser {
 
         public ServerChooser newChooser(Server[] servers) {
             if (isPowerOfTwo(servers.length)) {
-                return new PowerOfTwoEventExecutorChooser(servers);
+                return new PowerOfTwoEventExecutor(servers);
             } else {
-                return new GenericEventExecutorChooser(servers);
+                return new GenericEventExecutor(servers);
             }
         }
 
-        private static final class PowerOfTwoEventExecutorChooser implements ServerChooser {
+        //nested static class
+        private static final class PowerOfTwoEventExecutor implements ServerChooser {
             private final AtomicInteger idx = new AtomicInteger();
             private final Server[] servers;
 
-            PowerOfTwoEventExecutorChooser(Server[] servers) {
+            PowerOfTwoEventExecutor(Server[] servers) {
                 this.servers = servers;
             }
 
@@ -53,11 +54,12 @@ public class RoundRobin implements ServerChooser {
             }
         }
 
-        private static final class GenericEventExecutorChooser implements ServerChooser {
+        //nested static class
+        private static final class GenericEventExecutor implements ServerChooser {
             private final AtomicInteger idx = new AtomicInteger();
             private final Server[] servers;
 
-            GenericEventExecutorChooser(Server[] servers) {
+            GenericEventExecutor(Server[] servers) {
                 this.servers = servers;
             }
 

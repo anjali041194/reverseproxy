@@ -105,6 +105,7 @@ public class DownStreamHandler extends SimpleChannelInboundHandler<FullHttpReque
         connectFuture.addListener(new ChannelFutureListener() {
             @Override
             public void operationComplete(ChannelFuture future) throws Exception {
+                System.out.println("Operation Complete");
                 if (future.isSuccess()) {
                     setContextAndRequest(server, proxyPass, request, future.channel(), downstream, keepAlived, true,
                             maxAttempts);
