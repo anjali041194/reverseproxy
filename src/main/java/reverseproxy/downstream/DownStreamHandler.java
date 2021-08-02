@@ -38,7 +38,7 @@ public class DownStreamHandler extends SimpleChannelInboundHandler<FullHttpReque
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
         final Channel downstream = ctx.channel();
 
-        boolean keepAlived = HttpUtil.isKeepAlive(request);
+        boolean keepAlive = HttpUtil.isKeepAlive(request);
         HttpHeaders requestHeaders = request.headers();
 
         // get Host header
@@ -52,7 +52,7 @@ public class DownStreamHandler extends SimpleChannelInboundHandler<FullHttpReque
         if (null == proxyPass || null == (roundRobin = robinFactory.roundRobin(proxyPass))
                 || null == (server = roundRobin.next())) {
             // return 404
-            notFound(ctx, keepAlived);
+            notFound(ctx, keepAlive);
             return;
         }
 
@@ -63,7 +63,7 @@ public class DownStreamHandler extends SimpleChannelInboundHandler<FullHttpReque
         // increase refCount
         request.retain();
         // proxy request
-        proxy(server, proxyPass, downstream, request, keepAlived, MAX_ATTEMPTS);
+        proxy(server, proxyPass, downstream, request, keepAlive, MAX_ATTEMPTS);
     }
 
     public void proxy(Server server, String proxyPass, Channel downstream, FullHttpRequest request, boolean keepAlived,
@@ -147,10 +147,10 @@ public class DownStreamHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     public void setContextAndRequest(Server server, String proxyPass, FullHttpRequest request, Channel upstream,
-                                     Channel downstream, boolean keepAlived, final boolean newConn, final int maxAttempts) {
+                                     Channel downstream, boolean keepAlive, final boolean newConn, final int maxAttempts) {
         // set request context
         upstream.attr(AttributeKeys.DOWNSTREAM_CHANNEL_KEY).set(downstream);
-        upstream.attr(AttributeKeys.KEEP_ALIVED_KEY).set(keepAlived);
+        upstream.attr(AttributeKeys.KEEP_ALIVED_KEY).set(keepAlive);
 
         request.retain();
         upstream.writeAndFlush(request).addListener(new ChannelFutureListener() {
@@ -158,7 +158,7 @@ public class DownStreamHandler extends SimpleChannelInboundHandler<FullHttpReque
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (!future.isSuccess()) {
                     if (maxAttempts > 0) {
-                        proxy(server, proxyPass, downstream, request, keepAlived, maxAttempts - 1);
+                        proxy(server, proxyPass, downstream, request, keepAlive, maxAttempts - 1);
                     } else {
                         downstream.writeAndFlush(RequestContext.errorResponse(), downstream.voidPromise());
                         logger.error(String.format("%s upstream channel[%s] write to backed fail",

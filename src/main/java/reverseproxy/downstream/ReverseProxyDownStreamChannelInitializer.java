@@ -12,14 +12,12 @@ public class ReverseProxyDownStreamChannelInitializer extends ChannelInitializer
     private final DownStreamHandler downStreamHandler;
 
     public ReverseProxyDownStreamChannelInitializer(ReverseProxyConfig config, DownStreamHandler downStreamHandler) {
-        //this.config = config;
         this.downStreamHandler = downStreamHandler;
     }
 
     @Override
     protected void initChannel(Channel ch) throws Exception {
         ChannelPipeline pipeline = ch.pipeline();
-        //pipeline.addLast(new IdleStateHandler(0, 0, config.keepaliveTimeout(), TimeUnit.SECONDS));
         pipeline.addLast(new HttpServerCodec());
         pipeline.addLast(new HttpObjectAggregator(512 * 1024));
         pipeline.addLast(downStreamHandler);

@@ -36,7 +36,7 @@ public class UpStreamHandler extends SimpleChannelInboundHandler<FullHttpRespons
 
         // get context and clear
         Channel downstream = upstream.attr(AttributeKeys.DOWNSTREAM_CHANNEL_KEY).getAndSet(null);
-        boolean keepAlived = upstream.attr(AttributeKeys.KEEP_ALIVED_KEY).getAndSet(null);
+        boolean keepAlive = upstream.attr(AttributeKeys.KEEP_ALIVED_KEY).getAndSet(null);
 
         LinkedList<Connection> conns = RequestContext.keepAlivedConntions(proxyPass);
 
@@ -50,7 +50,7 @@ public class UpStreamHandler extends SimpleChannelInboundHandler<FullHttpRespons
             tmp.close();
         }
         conns.addLast(new Connection(server, upstream));
-        if (keepAlived) {
+        if (keepAlive) {
             response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
             downstream.writeAndFlush(response.retain(), downstream.voidPromise());
         } else {// close the downstream connection
