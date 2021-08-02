@@ -35,6 +35,38 @@ public class DownStreamHandler extends SimpleChannelInboundHandler<FullHttpReque
     }
 
     @Override
+    protected void channelRead0(ChannelHandlerContext channelHandlerContext, FullHttpRequest fullHttpRequest) throws Exception {
+        final Channel downstream = channelHandlerContext.channel();
+
+        boolean keepAlive = HttpUtil.isKeepAlive(fullHttpRequest);
+        HttpHeaders requestHeaders = fullHttpRequest.headers();
+
+        // get Host header
+        String serverName = requestHeaders.get(HttpHeaderNames.HOST);
+        // get proxy_pass
+        String proxyPass = config.proxyPass(serverName, fullHttpRequest.uri());
+
+        // get roundRobin
+        RoundRobin roundRobin = null;
+        Server server = null;
+        if (null == proxyPass || null == (roundRobin = robinFactory.roundRobin(proxyPass))
+                || null == (server = roundRobin.next())) {
+            // return 404
+            notFound(channelHandlerContext, keepAlive);
+            return;
+        }
+
+        // rewrite http request(keep alive to upstream)
+        fullHttpRequest.setProtocolVersion(HttpVersion.HTTP_1_1);
+        requestHeaders.remove(HttpHeaderNames.CONNECTION);
+
+        // increase refCount
+        fullHttpRequest.retain();
+        // proxy request
+        proxy(server, proxyPass, downstream, fullHttpRequest, keepAlive, MAX_ATTEMPTS);
+    }
+
+    /*@Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
         final Channel downstream = ctx.channel();
 
@@ -64,7 +96,7 @@ public class DownStreamHandler extends SimpleChannelInboundHandler<FullHttpReque
         request.retain();
         // proxy request
         proxy(server, proxyPass, downstream, request, keepAlive, MAX_ATTEMPTS);
-    }
+    }*/
 
     public void proxy(Server server, String proxyPass, Channel downstream, FullHttpRequest request, boolean keepAlived,
                       int maxAttempts) {

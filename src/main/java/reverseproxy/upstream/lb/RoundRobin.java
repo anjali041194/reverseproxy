@@ -4,35 +4,37 @@ import reverseproxy.conf.ReverseProxyConfig.Server;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-interface ServerChooser {
+interface ServerSelection {
     Server next();
 }
 
-public class RoundRobin implements ServerChooser {
+public class RoundRobin implements ServerSelection {
 
-    private final ServerChooser inner;
+    private final ServerSelection inner;
 
     public RoundRobin(Server[] servers) {
-        inner = ServerChooserFactory.INSTANCE.newChooser(servers);
+        inner = ServerSelectionFactory.INSTANCE.newSelection(servers);
     }
 
     @Override
     public Server next() {
-        return inner.next();
+        Server server = inner.next();
+        System.out.println(server.toString());
+        return server;
     }
 
-    static class ServerChooserFactory {
+    static class ServerSelectionFactory {
 
-        public static final ServerChooserFactory INSTANCE = new ServerChooserFactory();
+        public static final ServerSelectionFactory INSTANCE = new ServerSelectionFactory();
 
-        private ServerChooserFactory() {
+        private ServerSelectionFactory() {
         }
 
         private static boolean isPowerOfTwo(int val) {
             return (val & -val) == val;
         }
 
-        public ServerChooser newChooser(Server[] servers) {
+        public ServerSelection newSelection(Server[] servers) {
             if (isPowerOfTwo(servers.length)) {
                 return new PowerOfTwoEventExecutor(servers);
             } else {
@@ -41,7 +43,7 @@ public class RoundRobin implements ServerChooser {
         }
 
         //nested static class
-        private static final class PowerOfTwoEventExecutor implements ServerChooser {
+        private static final class PowerOfTwoEventExecutor implements ServerSelection {
             private final AtomicInteger idx = new AtomicInteger();
             private final Server[] servers;
 
@@ -55,7 +57,7 @@ public class RoundRobin implements ServerChooser {
         }
 
         //nested static class
-        private static final class GenericEventExecutor implements ServerChooser {
+        private static final class GenericEventExecutor implements ServerSelection {
             private final AtomicInteger idx = new AtomicInteger();
             private final Server[] servers;
 

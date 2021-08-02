@@ -252,5 +252,9 @@ public class ReverseProxyConfig {
                 return false;
             return true;
         }
+
+        public String toString() {
+            return "Server: IP = " + getIp() + " port: " + getPort() + " keepAlive: " + getKeepalive();
+        }
     }
 }

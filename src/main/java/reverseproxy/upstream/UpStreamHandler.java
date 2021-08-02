@@ -31,8 +31,8 @@ public class UpStreamHandler extends SimpleChannelInboundHandler<FullHttpRespons
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, FullHttpResponse response) throws Exception {
-        Channel upstream = ctx.channel();
+    protected void channelRead0(ChannelHandlerContext channelHandlerContext, FullHttpResponse fullHttpResponse) throws Exception {
+        Channel upstream = channelHandlerContext.channel();
 
         // get context and clear
         Channel downstream = upstream.attr(AttributeKeys.DOWNSTREAM_CHANNEL_KEY).getAndSet(null);
@@ -51,10 +51,10 @@ public class UpStreamHandler extends SimpleChannelInboundHandler<FullHttpRespons
         }
         conns.addLast(new Connection(server, upstream));
         if (keepAlive) {
-            response.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
-            downstream.writeAndFlush(response.retain(), downstream.voidPromise());
+            fullHttpResponse.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
+            downstream.writeAndFlush(fullHttpResponse.retain(), downstream.voidPromise());
         } else {// close the downstream connection
-            downstream.writeAndFlush(response.retain()).addListener(ChannelFutureListener.CLOSE);
+            downstream.writeAndFlush(fullHttpResponse.retain()).addListener(ChannelFutureListener.CLOSE);
         }
     }
 
